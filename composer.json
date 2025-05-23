@@ -9,7 +9,7 @@
     "ext-hash": "*",
     "ext-openssl": "*",
     "paragonie/sodium_compat": "^2.0",
-    "phpseclib/phpseclib": "^3.0",
+    "phpseclib/phpseclib": "^3.0.43",
     "tourze/tls-common": "0.0.*"
   },
   "require-dev": {
