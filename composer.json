@@ -5,7 +5,6 @@
   "license": "MIT",
   "require": {
     "php": "^8.1",
-    "ext-gmp": "*",
     "ext-hash": "*",
     "ext-openssl": "*",
     "paragonie/sodium_compat": "^2.0",
