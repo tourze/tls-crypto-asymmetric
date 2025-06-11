@@ -45,7 +45,7 @@ class Ed25519 implements AsymmetricCipherInterface
                 'privateKey' => $privateKey,
                 'publicKey' => $publicKey,
             ];
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed25519密钥对生成失败: ' . $e->getMessage());
         }
     }
@@ -106,7 +106,7 @@ class Ed25519 implements AsymmetricCipherInterface
         try {
             // 使用Ed25519算法进行签名
             return ParagonIE_Sodium_Compat::crypto_sign_detached($data, $privateKey);
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed25519签名失败: ' . $e->getMessage());
         }
     }
@@ -145,7 +145,7 @@ class Ed25519 implements AsymmetricCipherInterface
         try {
             // 验证签名
             return ParagonIE_Sodium_Compat::crypto_sign_verify_detached($signature, $data, $publicKey);
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed25519签名验证失败: ' . $e->getMessage());
         }
     }

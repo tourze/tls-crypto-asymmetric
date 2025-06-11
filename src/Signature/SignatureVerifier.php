@@ -40,7 +40,7 @@ class SignatureVerifier
                 'ecdsa' => $this->verifyECDSASignature($data, $signature, $publicKey, $hashAlgorithm),
                 default => throw new \InvalidArgumentException("未知的签名类型: {$signatureType}")
             };
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             // 签名验证过程中出现任何异常都视为验证失败
             return false;
         }

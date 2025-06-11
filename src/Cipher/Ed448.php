@@ -122,7 +122,7 @@ class Ed448 implements AsymmetricCipherInterface
                 'privateKey' => $privateKeyPem,
                 'publicKey' => $publicKeyPem,
             ];
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed448密钥对生成失败: ' . $e->getMessage());
         }
     }
@@ -193,7 +193,7 @@ class Ed448 implements AsymmetricCipherInterface
             }
 
             return $signature;
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed448签名失败: ' . $e->getMessage());
         }
     }
@@ -234,7 +234,7 @@ class Ed448 implements AsymmetricCipherInterface
             }
 
             return $result === 1;
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('Ed448签名验证失败: ' . $e->getMessage());
         }
     }

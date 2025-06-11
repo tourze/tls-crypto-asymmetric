@@ -87,7 +87,7 @@ class DSA implements AsymmetricCipherInterface
                 'publicKey' => $publicKeyPem,
                 'bits' => $keyBits,
             ];
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('DSA密钥对生成失败: ' . $e->getMessage());
         }
     }
@@ -163,7 +163,7 @@ class DSA implements AsymmetricCipherInterface
             }
 
             return $signature;
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('DSA签名失败: ' . $e->getMessage());
         }
     }
@@ -208,7 +208,7 @@ class DSA implements AsymmetricCipherInterface
             }
 
             return $result === 1;
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             throw new AsymmetricCipherException('DSA签名验证失败: ' . $e->getMessage());
         }
     }
