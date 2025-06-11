@@ -91,7 +91,7 @@ class CryptoExceptionTest extends TestCase
 
         try {
             throw new CryptoException($message);
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             $caught = true;
             $this->assertEquals($message, $e->getMessage());
         }

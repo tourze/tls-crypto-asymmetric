@@ -52,7 +52,7 @@ class ECDSA implements AsymmetricCipherInterface
             if ($supportedCurves === false) {
                 throw new AsymmetricCipherException('无法获取支持的椭圆曲线列表');
             }
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             throw new AsymmetricCipherException('获取支持的椭圆曲线失败: ' . $e->getMessage());
         }
 
@@ -97,7 +97,7 @@ class ECDSA implements AsymmetricCipherInterface
             ];
         } catch (AsymmetricCipherException $e) {
             throw $e;
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             throw new AsymmetricCipherException('ECDSA密钥对生成失败: ' . $e->getMessage());
         }
     }
@@ -168,7 +168,7 @@ class ECDSA implements AsymmetricCipherInterface
             }
 
             return $signature;
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             throw new AsymmetricCipherException('ECDSA签名失败: ' . $e->getMessage());
         }
     }
@@ -207,7 +207,7 @@ class ECDSA implements AsymmetricCipherInterface
             }
 
             return $result === 1;
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             throw new AsymmetricCipherException('ECDSA签名验证失败: ' . $e->getMessage());
         }
     }

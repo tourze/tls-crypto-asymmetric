@@ -111,7 +111,7 @@ class AsymmetricCipherExceptionTest extends TestCase
 
         try {
             throw new AsymmetricCipherException($message);
-        } catch (\Exception $e) {
+        } catch  (\Throwable $e) {
             $caught = true;
             $this->assertEquals($message, $e->getMessage());
         }
