@@ -163,16 +163,12 @@ class RSATest extends TestCase
             $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
-        try {
-            $plaintext = 'Hello, RSA!';
-            $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
-            $invalidPrivateKey = 'invalid key';
+        $plaintext = 'Hello, RSA!';
+        $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
+        $invalidPrivateKey = 'invalid key';
 
-            $this->expectException(AsymmetricCipherException::class);
-            $this->rsa->decrypt($ciphertext, $invalidPrivateKey);
-        } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA加密失败，无法继续测试解密: ' . $e->getMessage());
-        }
+        $this->expectException(AsymmetricCipherException::class);
+        $this->rsa->decrypt($ciphertext, $invalidPrivateKey);
     }
 
     /**
@@ -212,24 +208,20 @@ class RSATest extends TestCase
             $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
-        try {
-            $data = 'Message to sign';
+        $data = 'Message to sign';
 
-            // 默认使用SHA-256签名
-            $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
-            $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey']);
+        // 默认使用SHA-256签名
+        $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
+        $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey']);
 
-            $this->assertTrue($isValid);
+        $this->assertTrue($isValid);
 
-            // 测试SHA-512签名
-            $options = ['algorithm' => 'sha512'];
-            $signature = $this->rsa->sign($data, $this->keyPair['privateKey'], $options);
-            $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey'], $options);
+        // 对于512位的密钥，不能使用SHA-512，改用SHA-1
+        $options = ['algorithm' => 'sha1'];
+        $signature = $this->rsa->sign($data, $this->keyPair['privateKey'], $options);
+        $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey'], $options);
 
-            $this->assertTrue($isValid);
-        } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
-        }
+        $this->assertTrue($isValid);
     }
 
     /**
@@ -360,16 +352,12 @@ class RSATest extends TestCase
             $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
-        try {
-            $data = 'Message to sign';
-            $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
-            $invalidPublicKey = 'invalid key';
+        $data = 'Message to sign';
+        $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
+        $invalidPublicKey = 'invalid key';
 
-            $this->expectException(AsymmetricCipherException::class);
-            $this->rsa->verify($data, $signature, $invalidPublicKey);
-        } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA签名测试失败，无法继续测试验证: ' . $e->getMessage());
-        }
+        $this->expectException(AsymmetricCipherException::class);
+        $this->rsa->verify($data, $signature, $invalidPublicKey);
     }
 
     protected function setUp(): void

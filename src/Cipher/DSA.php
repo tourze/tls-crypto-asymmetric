@@ -163,7 +163,11 @@ class DSA implements AsymmetricCipherInterface
             }
 
             return $signature;
+        } catch (AsymmetricCipherException $e) {
+            // 如果是AsymmetricCipherException，则重新抛出
+            throw $e;
         } catch (\Throwable $e) {
+            // 其他异常也抛出
             throw new AsymmetricCipherException('DSA签名失败: ' . $e->getMessage());
         }
     }
@@ -203,12 +207,23 @@ class DSA implements AsymmetricCipherInterface
 
             // 使用OpenSSL验证签名
             $result = openssl_verify($data, $signature, $pubKey, $digestAlg);
+            
+            // 只有当result为-1且有错误信息时才抛出异常
             if ($result === -1) {
-                throw new AsymmetricCipherException('DSA签名验证失败: ' . openssl_error_string());
+                $error = openssl_error_string();
+                if ($error) {
+                    throw new AsymmetricCipherException('DSA签名验证失败: ' . $error);
+                }
+                // 如果没有错误信息，可能是签名格式问题，返回false
+                return false;
             }
 
             return $result === 1;
+        } catch (AsymmetricCipherException $e) {
+            // 如果是AsymmetricCipherException，则重新抛出
+            throw $e;
         } catch (\Throwable $e) {
+            // 其他异常也抛出
             throw new AsymmetricCipherException('DSA签名验证失败: ' . $e->getMessage());
         }
     }
