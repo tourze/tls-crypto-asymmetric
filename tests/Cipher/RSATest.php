@@ -365,8 +365,6 @@ class RSATest extends TestCase
         // 检查OpenSSL扩展是否加载
         if (!extension_loaded('openssl')) {
             $this->markTestSkipped('OpenSSL扩展未加载，跳过RSA测试：请确保OpenSSL扩展已安装并在php.ini中启用');
-            $this->skipTests = true;
-            return;
         }
 
         // 输出调试信息

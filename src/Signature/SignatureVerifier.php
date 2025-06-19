@@ -57,10 +57,13 @@ class SignatureVerifier
      */
     private function verifyRSASignature(string $data, string $signature, string $publicKey, string $hashAlgorithm): bool
     {
+        /** @var \phpseclib3\Crypt\RSA\PublicKey $rsa */
         $rsa = RSA::loadPublicKey($publicKey);
 
         // 设置签名模式和哈希算法
+        /** @var \phpseclib3\Crypt\RSA\PublicKey $rsa */
         $rsa = $rsa->withPadding(RSA::SIGNATURE_PKCS1);
+        /** @var \phpseclib3\Crypt\RSA\PublicKey $rsa */
         $rsa = $rsa->withHash($hashAlgorithm);
 
         return $rsa->verify($data, $signature);
@@ -77,9 +80,11 @@ class SignatureVerifier
      */
     private function verifyECDSASignature(string $data, string $signature, string $publicKey, string $hashAlgorithm): bool
     {
+        /** @var \phpseclib3\Crypt\EC\PublicKey $ec */
         $ec = EC::loadPublicKey($publicKey);
 
         // 设置哈希算法
+        /** @var \phpseclib3\Crypt\EC\PublicKey $ec */
         $ec = $ec->withHash($hashAlgorithm);
 
         return $ec->verify($data, $signature);

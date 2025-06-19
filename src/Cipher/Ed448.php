@@ -18,16 +18,6 @@ use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 class Ed448 implements AsymmetricCipherInterface
 {
     /**
-     * Ed448私钥字节长度 (114字节)
-     */
-    private const SECRET_KEY_BYTES = 114;
-
-    /**
-     * Ed448公钥字节长度 (57字节)
-     */
-    private const PUBLIC_KEY_BYTES = 57;
-
-    /**
      * Ed448签名字节长度 (114字节)
      */
     private const SIGNATURE_BYTES = 114;

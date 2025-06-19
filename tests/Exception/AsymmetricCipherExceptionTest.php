@@ -127,7 +127,6 @@ class AsymmetricCipherExceptionTest extends TestCase
         $exception = new AsymmetricCipherException('Stack trace test');
 
         $trace = $exception->getTrace();
-        $this->assertIsArray($trace);
         $this->assertNotEmpty($trace);
 
         // 验证栈顶是当前方法

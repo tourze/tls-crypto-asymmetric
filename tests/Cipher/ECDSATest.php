@@ -69,7 +69,6 @@ class ECDSATest extends TestCase
 
             if ($keyPair === null) {
                 $this->markTestSkipped('无法使用任何常见曲线生成ECDSA密钥对');
-                return;
             }
 
             $this->assertArrayHasKey('privateKey', $keyPair);
