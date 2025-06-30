@@ -6,6 +6,7 @@ namespace Tourze\TLSCryptoAsymmetric\Tests\Signature;
 
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use Tourze\TLSCryptoAsymmetric\Exception\InvalidSignatureAlgorithmException;
 use Tourze\TLSCryptoAsymmetric\Signature\SignatureVerifier;
 
 /**
@@ -60,7 +61,7 @@ class SignatureVerifierTest extends TestCase
      */
     public function testVerifyWithUnsupportedAlgorithm(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('不支持的签名算法: unsupported-algorithm');
         
         $this->verifier->verify('test data', 'dummy signature', 'dummy key', 'unsupported-algorithm');
@@ -72,7 +73,7 @@ class SignatureVerifierTest extends TestCase
     public function testVerifyWithInvalidAlgorithmIdentifier(): void
     {
         // 不支持的算法会在isAlgorithmSupported检查时就抛出异常
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('不支持的签名算法: invalid-algorithm-format');
         
         $this->verifier->verify('test data', 'dummy signature', 'dummy key', 'invalid-algorithm-format');
@@ -134,7 +135,7 @@ class SignatureVerifierTest extends TestCase
         $parseMethod = $reflection->getMethod('parseAlgorithm');
         $parseMethod->setAccessible(true);
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('无法解析算法: unknown-algorithm');
         
         $parseMethod->invoke($this->verifier, 'unknown-algorithm');

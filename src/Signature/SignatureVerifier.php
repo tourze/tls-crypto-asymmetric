@@ -6,6 +6,7 @@ namespace Tourze\TLSCryptoAsymmetric\Signature;
 
 use phpseclib3\Crypt\EC;
 use phpseclib3\Crypt\RSA;
+use Tourze\TLSCryptoAsymmetric\Exception\InvalidSignatureAlgorithmException;
 
 /**
  * 签名验证器 - 用于验证证书和CRL的数字签名
@@ -25,7 +26,7 @@ class SignatureVerifier
     public function verify(string $data, string $signature, string $publicKey, string $algorithm): bool
     {
         if (!$this->isAlgorithmSupported($algorithm)) {
-            throw new \InvalidArgumentException("不支持的签名算法: {$algorithm}");
+            throw new InvalidSignatureAlgorithmException("不支持的签名算法: {$algorithm}");
         }
 
         try {
@@ -38,7 +39,7 @@ class SignatureVerifier
             return match ($signatureType) {
                 'rsa' => $this->verifyRSASignature($data, $signature, $publicKey, $hashAlgorithm),
                 'ecdsa' => $this->verifyECDSASignature($data, $signature, $publicKey, $hashAlgorithm),
-                default => throw new \InvalidArgumentException("未知的签名类型: {$signatureType}")
+                default => throw new InvalidSignatureAlgorithmException("未知的签名类型: {$signatureType}")
             };
         } catch (\Throwable $e) {
             // 签名验证过程中出现任何异常都视为验证失败
@@ -107,7 +108,7 @@ class SignatureVerifier
             'ecdsa-with-SHA256' => ['hash' => 'sha256', 'type' => 'ecdsa'],
             'ecdsa-with-SHA384' => ['hash' => 'sha384', 'type' => 'ecdsa'],
             'ecdsa-with-SHA512' => ['hash' => 'sha512', 'type' => 'ecdsa'],
-            default => throw new \InvalidArgumentException("无法解析算法: {$algorithm}")
+            default => throw new InvalidSignatureAlgorithmException("无法解析算法: {$algorithm}")
         };
     }
 

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\KeyPair;
 
+use Tourze\TLSCryptoAsymmetric\Exception\InvalidKeyPairException;
+
 /**
  * 密钥对类，封装公钥和私钥
  */
@@ -40,7 +42,7 @@ class KeyPair
     public static function fromArray(array $keyPair): self
     {
         if (!isset($keyPair['privateKey']) || !isset($keyPair['publicKey'])) {
-            throw new \InvalidArgumentException('密钥对数组必须包含 privateKey 和 publicKey');
+            throw new InvalidKeyPairException('密钥对数组必须包含 privateKey 和 publicKey');
         }
 
         return new self($keyPair['privateKey'], $keyPair['publicKey']);

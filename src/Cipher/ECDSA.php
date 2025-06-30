@@ -71,21 +71,21 @@ class ECDSA implements AsymmetricCipherInterface
 
             if ($privateKey === false) {
                 $error = openssl_error_string();
-                throw new AsymmetricCipherException('ECDSA密钥对生成失败: ' . ($error ?: '未知错误'));
+                throw new AsymmetricCipherException('ECDSA密钥对生成失败: ' . ($error !== false ? $error : '未知错误'));
             }
 
             // 导出私钥细节
             $keyDetails = @openssl_pkey_get_details($privateKey);
             if ($keyDetails === false) {
                 $error = openssl_error_string();
-                throw new AsymmetricCipherException('无法获取ECDSA密钥细节: ' . ($error ?: '未知错误'));
+                throw new AsymmetricCipherException('无法获取ECDSA密钥细节: ' . ($error !== false ? $error : '未知错误'));
             }
 
             // 导出 PEM 格式的私钥和公钥
             $privateKeyPem = '';
             if (!@openssl_pkey_export($privateKey, $privateKeyPem)) {
                 $error = openssl_error_string();
-                throw new AsymmetricCipherException('导出ECDSA私钥失败: ' . ($error ?: '未知错误'));
+                throw new AsymmetricCipherException('导出ECDSA私钥失败: ' . ($error !== false ? $error : '未知错误'));
             }
 
             $publicKeyPem = $keyDetails['key'];
