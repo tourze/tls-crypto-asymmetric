@@ -4,17 +4,26 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Cipher;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\TLSCryptoAsymmetric\Cipher\RSA;
 use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 
 /**
  * RSA测试类
+ *
+ * @internal
  */
-class RSATest extends TestCase
+#[CoversClass(RSA::class)]
+final class RSATest extends TestCase
 {
     private RSA $rsa;
+
+    /**
+     * @var array<string, string>|null
+     */
     private ?array $keyPair = null;
+
     private bool $skipTests = false;
 
     /**
@@ -23,7 +32,7 @@ class RSATest extends TestCase
     public function testGetName(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $this->assertEquals('rsa', $this->rsa->getName());
@@ -35,10 +44,11 @@ class RSATest extends TestCase
     public function testGenerateKeyPair(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $keyPair = $this->keyPair;
+        $this->assertIsArray($keyPair);
 
         $this->assertArrayHasKey('privateKey', $keyPair);
         $this->assertArrayHasKey('publicKey', $keyPair);
@@ -60,7 +70,7 @@ class RSATest extends TestCase
     public function testGenerateKeyPairWithDifferentSizes(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $keySizes = [1024, 2048];
@@ -75,7 +85,7 @@ class RSATest extends TestCase
                 $this->assertNotEmpty($keyPair['privateKey']);
                 $this->assertNotEmpty($keyPair['publicKey']);
             } catch (AsymmetricCipherException $e) {
-                $this->markTestSkipped('无法生成' . $keySize . '位RSA密钥: ' . $e->getMessage());
+                self::markTestSkipped('无法生成' . $keySize . '位RSA密钥: ' . $e->getMessage());
             }
         }
     }
@@ -86,7 +96,7 @@ class RSATest extends TestCase
     public function testInvalidKeySize(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $this->expectException(AsymmetricCipherException::class);
@@ -99,12 +109,13 @@ class RSATest extends TestCase
     public function testEncryptAndDecrypt(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $plaintext = 'Hello, RSA!';
 
         try {
+            $this->assertIsArray($this->keyPair);
             // 测试OAEP填充（默认）
             $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
             $decrypted = $this->rsa->decrypt($ciphertext, $this->keyPair['privateKey']);
@@ -112,13 +123,14 @@ class RSATest extends TestCase
             $this->assertEquals($plaintext, $decrypted);
 
             // 测试PKCS1填充
+            $this->assertIsArray($this->keyPair); // 再次断言以确保类型安全
             $options = ['padding' => RSA::PADDING_PKCS1];
             $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey'], $options);
             $decrypted = $this->rsa->decrypt($ciphertext, $this->keyPair['privateKey'], $options);
 
             $this->assertEquals($plaintext, $decrypted);
         } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA加密解密测试失败: ' . $e->getMessage());
+            self::markTestSkipped('RSA加密解密测试失败: ' . $e->getMessage());
         }
     }
 
@@ -128,14 +140,16 @@ class RSATest extends TestCase
     public function testEncryptTooLongPlaintext(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         // 创建一个长度肯定超过RSA密钥大小的明文
         $plaintext = str_repeat('A', 1024);
 
+        $this->assertIsArray($this->keyPair);
+        $this->assertArrayHasKey('publicKey', $this->keyPair);
         $this->expectException(AsymmetricCipherException::class);
-        $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
+        $this->rsa->encrypt($plaintext, $this->keyPair['publicKey'] ?? 'invalid-key');
     }
 
     /**
@@ -144,7 +158,7 @@ class RSATest extends TestCase
     public function testEncryptWithInvalidPublicKey(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $plaintext = 'Hello, RSA!';
@@ -160,9 +174,10 @@ class RSATest extends TestCase
     public function testDecryptWithInvalidPrivateKey(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
+        $this->assertIsArray($this->keyPair);
         $plaintext = 'Hello, RSA!';
         $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
         $invalidPrivateKey = 'invalid key';
@@ -177,13 +192,14 @@ class RSATest extends TestCase
     public function testDecryptWithMismatchedKeys(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         try {
             // 生成另一个密钥对
             $anotherKeyPair = $this->rsa->generateKeyPair(['keySize' => 1024]);
 
+            $this->assertIsArray($this->keyPair);
             $plaintext = 'Hello, RSA!';
             $ciphertext = $this->rsa->encrypt($plaintext, $this->keyPair['publicKey']);
 
@@ -191,8 +207,8 @@ class RSATest extends TestCase
             $this->expectException(AsymmetricCipherException::class);
             $this->rsa->decrypt($ciphertext, $anotherKeyPair['privateKey']);
         } catch (AsymmetricCipherException $e) {
-            if (strpos($e->getMessage(), '生成') !== false) {
-                $this->markTestSkipped('无法生成第二个RSA密钥对: ' . $e->getMessage());
+            if (false !== strpos($e->getMessage(), '生成')) {
+                self::markTestSkipped('无法生成第二个RSA密钥对: ' . $e->getMessage());
             } else {
                 throw $e;
             }
@@ -205,9 +221,10 @@ class RSATest extends TestCase
     public function testSignAndVerify(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
+        $this->assertIsArray($this->keyPair);
         $data = 'Message to sign';
 
         // 默认使用SHA-256签名
@@ -216,10 +233,10 @@ class RSATest extends TestCase
 
         $this->assertTrue($isValid);
 
-        // 对于512位的密钥，不能使用SHA-512，改用SHA-1
+        // 对于512位的密钥，不能使用SHA-512，改用SHA-1 - 由于在同一方法内，已经断言过$this->keyPair
         $options = ['algorithm' => 'sha1'];
-        $signature = $this->rsa->sign($data, $this->keyPair['privateKey'], $options);
-        $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey'], $options);
+        $signature = $this->rsa->sign($data, $this->keyPair['privateKey'] ?? 'invalid-key', $options);
+        $isValid = $this->rsa->verify($data, $signature, $this->keyPair['publicKey'] ?? 'invalid-key', $options);
 
         $this->assertTrue($isValid);
     }
@@ -230,10 +247,11 @@ class RSATest extends TestCase
     public function testVerifyTamperedData(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         try {
+            $this->assertIsArray($this->keyPair);
             $data = 'Message to sign';
             $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
 
@@ -243,7 +261,7 @@ class RSATest extends TestCase
 
             $this->assertFalse($isValid);
         } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
+            self::markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
         }
     }
 
@@ -253,10 +271,11 @@ class RSATest extends TestCase
     public function testVerifyTamperedSignature(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         try {
+            $this->assertIsArray($this->keyPair);
             $data = 'Message to sign';
             $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
 
@@ -268,7 +287,7 @@ class RSATest extends TestCase
 
             $this->assertFalse($isValid);
         } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
+            self::markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
         }
     }
 
@@ -278,13 +297,14 @@ class RSATest extends TestCase
     public function testVerifyWithWrongPublicKey(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         try {
             // 生成另一个密钥对
             $anotherKeyPair = $this->rsa->generateKeyPair(['keySize' => 1024]);
 
+            $this->assertIsArray($this->keyPair);
             $data = 'Message to sign';
             $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
 
@@ -293,10 +313,10 @@ class RSATest extends TestCase
 
             $this->assertFalse($isValid);
         } catch (AsymmetricCipherException $e) {
-            if (strpos($e->getMessage(), '生成') !== false) {
-                $this->markTestSkipped('无法生成第二个RSA密钥对: ' . $e->getMessage());
+            if (false !== strpos($e->getMessage(), '生成')) {
+                self::markTestSkipped('无法生成第二个RSA密钥对: ' . $e->getMessage());
             } else {
-                $this->markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
+                self::markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
             }
         }
     }
@@ -307,10 +327,11 @@ class RSATest extends TestCase
     public function testVerifyWithWrongAlgorithm(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         try {
+            $this->assertIsArray($this->keyPair);
             $data = 'Message to sign';
 
             // 使用SHA-256签名
@@ -323,7 +344,7 @@ class RSATest extends TestCase
 
             $this->assertFalse($isValid);
         } catch (AsymmetricCipherException $e) {
-            $this->markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
+            self::markTestSkipped('RSA签名/验证测试失败: ' . $e->getMessage());
         }
     }
 
@@ -333,7 +354,7 @@ class RSATest extends TestCase
     public function testSignWithInvalidPrivateKey(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
         $data = 'Message to sign';
@@ -349,9 +370,10 @@ class RSATest extends TestCase
     public function testVerifyWithInvalidPublicKey(): void
     {
         if ($this->skipTests) {
-            $this->markTestSkipped('跳过测试，因为无法生成RSA密钥对');
+            self::markTestSkipped('跳过测试，因为无法生成RSA密钥对');
         }
 
+        $this->assertIsArray($this->keyPair);
         $data = 'Message to sign';
         $signature = $this->rsa->sign($data, $this->keyPair['privateKey']);
         $invalidPublicKey = 'invalid key';
@@ -362,13 +384,12 @@ class RSATest extends TestCase
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         // 检查OpenSSL扩展是否加载
         if (!extension_loaded('openssl')) {
-            $this->markTestSkipped('OpenSSL扩展未加载，跳过RSA测试：请确保OpenSSL扩展已安装并在php.ini中启用');
+            self::markTestSkipped('OpenSSL扩展未加载，跳过RSA测试：请确保OpenSSL扩展已安装并在php.ini中启用');
         }
-
-        // 输出调试信息
-        echo PHP_EOL . "OpenSSL版本: " . OPENSSL_VERSION_TEXT . PHP_EOL;
 
         $this->rsa = new RSA();
 
@@ -377,20 +398,17 @@ class RSATest extends TestCase
             // 先尝试512位密钥，虽然不安全，但可能可以成功生成，便于测试
             try {
                 $this->keyPair = $this->rsa->generateKeyPair(['keySize' => 512]);
-                echo "成功生成测试用512位RSA密钥对（仅用于测试）" . PHP_EOL;
+
                 return;
             } catch (AsymmetricCipherException $e) {
                 // 如果512位失败，再尝试1024位
-                echo "生成512位RSA密钥失败，尝试1024位..." . PHP_EOL;
             }
 
             // 使用较小的密钥大小以加速测试
             $this->keyPair = $this->rsa->generateKeyPair(['keySize' => 1024]);
-            echo "成功生成测试用1024位RSA密钥对" . PHP_EOL;
         } catch (AsymmetricCipherException $e) {
             $this->skipTests = true;
-            echo "RSA密钥生成失败: " . $e->getMessage() . PHP_EOL;
-            $this->markTestSkipped('无法生成RSA密钥对: ' . $e->getMessage());
+            self::markTestSkipped('无法生成RSA密钥对: ' . $e->getMessage());
         }
     }
 }

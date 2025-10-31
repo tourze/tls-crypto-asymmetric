@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 use Tourze\TLSCryptoAsymmetric\Exception\CryptoException;
 
 /**
  * AsymmetricCipherException测试
+ *
+ * @internal
  */
-class AsymmetricCipherExceptionTest extends TestCase
+#[CoversClass(AsymmetricCipherException::class)]
+final class AsymmetricCipherExceptionTest extends AbstractExceptionTestCase
 {
     /**
      * 测试异常基本功能
@@ -71,16 +75,11 @@ class AsymmetricCipherExceptionTest extends TestCase
     public function testExceptionCanBeCaught(): void
     {
         $message = 'Test exception catching';
-        $caught = false;
 
-        try {
-            throw new AsymmetricCipherException($message);
-        } catch (AsymmetricCipherException $e) {
-            $caught = true;
-            $this->assertEquals($message, $e->getMessage());
-        }
+        $this->expectException(AsymmetricCipherException::class);
+        $this->expectExceptionMessage($message);
 
-        $this->assertTrue($caught, 'AsymmetricCipherException should be caught');
+        throw new AsymmetricCipherException($message);
     }
 
     /**
@@ -89,16 +88,11 @@ class AsymmetricCipherExceptionTest extends TestCase
     public function testExceptionCanBeCaughtByParent(): void
     {
         $message = 'Test parent exception catching';
-        $caught = false;
 
-        try {
-            throw new AsymmetricCipherException($message);
-        } catch (CryptoException $e) {
-            $caught = true;
-            $this->assertEquals($message, $e->getMessage());
-        }
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage($message);
 
-        $this->assertTrue($caught, 'AsymmetricCipherException should be caught by CryptoException');
+        throw new AsymmetricCipherException($message);
     }
 
     /**
@@ -107,16 +101,11 @@ class AsymmetricCipherExceptionTest extends TestCase
     public function testExceptionCanBeCaughtByTopLevelException(): void
     {
         $message = 'Test top level exception catching';
-        $caught = false;
 
-        try {
-            throw new AsymmetricCipherException($message);
-        } catch (\Throwable $e) {
-            $caught = true;
-            $this->assertEquals($message, $e->getMessage());
-        }
+        $this->expectException(\Throwable::class);
+        $this->expectExceptionMessage($message);
 
-        $this->assertTrue($caught, 'AsymmetricCipherException should be caught by Exception');
+        throw new AsymmetricCipherException($message);
     }
 
     /**
@@ -131,7 +120,7 @@ class AsymmetricCipherExceptionTest extends TestCase
 
         // 验证栈顶是当前方法
         $this->assertEquals(__FUNCTION__, $trace[0]['function']);
-        $this->assertEquals(__CLASS__, $trace[0]['class']);
+        $this->assertEquals(__CLASS__, $trace[0]['class'] ?? '');
     }
 
     /**
@@ -146,4 +135,4 @@ class AsymmetricCipherExceptionTest extends TestCase
         $this->assertStringContainsString($message, $stringRepresentation);
         $this->assertStringContainsString('AsymmetricCipherException', $stringRepresentation);
     }
-} 
+}

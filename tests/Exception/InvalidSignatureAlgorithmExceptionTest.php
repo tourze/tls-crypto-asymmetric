@@ -2,18 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Tourze\TLSCryptoAsymmetric\Tests\Unit\Exception;
+namespace Tourze\TLSCryptoAsymmetric\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 use Tourze\TLSCryptoAsymmetric\Exception\CryptoException;
 use Tourze\TLSCryptoAsymmetric\Exception\InvalidSignatureAlgorithmException;
 
-class InvalidSignatureAlgorithmExceptionTest extends TestCase
+/**
+ * InvalidSignatureAlgorithmException测试
+ *
+ * @internal
+ */
+#[CoversClass(InvalidSignatureAlgorithmException::class)]
+final class InvalidSignatureAlgorithmExceptionTest extends AbstractExceptionTestCase
 {
     public function testExceptionIsInstanceOfCryptoException(): void
     {
         $exception = new InvalidSignatureAlgorithmException('Test message');
-        
+
         $this->assertInstanceOf(CryptoException::class, $exception);
     }
 
@@ -21,7 +28,7 @@ class InvalidSignatureAlgorithmExceptionTest extends TestCase
     {
         $message = 'Invalid signature algorithm specified';
         $exception = new InvalidSignatureAlgorithmException($message);
-        
+
         $this->assertSame($message, $exception->getMessage());
     }
 
@@ -30,7 +37,7 @@ class InvalidSignatureAlgorithmExceptionTest extends TestCase
         $message = 'Unsupported algorithm';
         $code = 400;
         $exception = new InvalidSignatureAlgorithmException($message, $code);
-        
+
         $this->assertSame($message, $exception->getMessage());
         $this->assertSame($code, $exception->getCode());
     }
@@ -39,7 +46,7 @@ class InvalidSignatureAlgorithmExceptionTest extends TestCase
     {
         $previous = new \Exception('Previous exception');
         $exception = new InvalidSignatureAlgorithmException('Current exception', 0, $previous);
-        
+
         $this->assertSame($previous, $exception->getPrevious());
     }
 }

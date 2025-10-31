@@ -4,15 +4,25 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Cipher;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\TLSCryptoAsymmetric\Cipher\Ed25519;
 use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 
 /**
  * Ed25519签名算法测试
+ *
+ * @internal
  */
-class Ed25519Test extends TestCase
+#[CoversClass(Ed25519::class)]
+final class Ed25519Test extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // 这个测试类不需要特殊的设置
+    }
+
     /**
      * 测试获取算法名称
      */
@@ -29,9 +39,7 @@ class Ed25519Test extends TestCase
     {
         // 检查sodium扩展或sodium_compat是否可用
         if (!extension_loaded('sodium') && !class_exists('ParagonIE_Sodium_Compat')) {
-            $this->markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
-        } else {
-            echo PHP_EOL . "使用 " . (extension_loaded('sodium') ? "原生libsodium扩展" : "ParagonIE_Sodium_Compat库") . " 进行Ed25519测试" . PHP_EOL;
+            self::markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
         }
 
         $ed25519 = new Ed25519();
@@ -60,7 +68,7 @@ class Ed25519Test extends TestCase
     {
         // 检查sodium扩展或sodium_compat是否可用
         if (!extension_loaded('sodium') && !class_exists('ParagonIE_Sodium_Compat')) {
-            $this->markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
+            self::markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
         }
 
         $ed25519 = new Ed25519();
@@ -122,7 +130,7 @@ class Ed25519Test extends TestCase
     {
         // 检查sodium扩展或sodium_compat是否可用
         if (!extension_loaded('sodium') && !class_exists('ParagonIE_Sodium_Compat')) {
-            $this->markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
+            self::markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
         }
 
         $ed25519 = new Ed25519();
@@ -137,7 +145,7 @@ class Ed25519Test extends TestCase
     {
         // 检查sodium扩展或sodium_compat是否可用
         if (!extension_loaded('sodium') && !class_exists('ParagonIE_Sodium_Compat')) {
-            $this->markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
+            self::markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
         }
 
         $ed25519 = new Ed25519();
@@ -158,7 +166,7 @@ class Ed25519Test extends TestCase
     {
         // 检查sodium扩展或sodium_compat是否可用
         if (!extension_loaded('sodium') && !class_exists('ParagonIE_Sodium_Compat')) {
-            $this->markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
+            self::markTestSkipped('libsodium扩展未加载且sodium_compat不可用，无法测试Ed25519');
         }
 
         $ed25519 = new Ed25519();

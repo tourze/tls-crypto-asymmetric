@@ -4,20 +4,24 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Signature;
 
-use InvalidArgumentException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\TLSCryptoAsymmetric\Exception\InvalidSignatureAlgorithmException;
 use Tourze\TLSCryptoAsymmetric\Signature\SignatureVerifier;
 
 /**
  * 签名验证器测试
+ *
+ * @internal
  */
-class SignatureVerifierTest extends TestCase
+#[CoversClass(SignatureVerifier::class)]
+final class SignatureVerifierTest extends TestCase
 {
     private SignatureVerifier $verifier;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->verifier = new SignatureVerifier();
     }
 
@@ -27,7 +31,7 @@ class SignatureVerifierTest extends TestCase
     public function testGetSupportedAlgorithms(): void
     {
         $algorithms = $this->verifier->getSupportedAlgorithms();
-        
+
         $expectedAlgorithms = [
             'sha1WithRSAEncryption',
             'sha256WithRSAEncryption',
@@ -38,7 +42,7 @@ class SignatureVerifierTest extends TestCase
             'ecdsa-with-SHA384',
             'ecdsa-with-SHA512',
         ];
-        
+
         $this->assertEquals($expectedAlgorithms, $algorithms);
     }
 
@@ -50,7 +54,7 @@ class SignatureVerifierTest extends TestCase
         // 测试支持的算法
         $this->assertTrue($this->verifier->isAlgorithmSupported('sha256WithRSAEncryption'));
         $this->assertTrue($this->verifier->isAlgorithmSupported('ecdsa-with-SHA256'));
-        
+
         // 测试不支持的算法
         $this->assertFalse($this->verifier->isAlgorithmSupported('md5WithRSAEncryption'));
         $this->assertFalse($this->verifier->isAlgorithmSupported('unknown-algorithm'));
@@ -63,7 +67,7 @@ class SignatureVerifierTest extends TestCase
     {
         $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('不支持的签名算法: unsupported-algorithm');
-        
+
         $this->verifier->verify('test data', 'dummy signature', 'dummy key', 'unsupported-algorithm');
     }
 
@@ -75,7 +79,7 @@ class SignatureVerifierTest extends TestCase
         // 不支持的算法会在isAlgorithmSupported检查时就抛出异常
         $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('不支持的签名算法: invalid-algorithm-format');
-        
+
         $this->verifier->verify('test data', 'dummy signature', 'dummy key', 'invalid-algorithm-format');
     }
 
@@ -137,7 +141,7 @@ class SignatureVerifierTest extends TestCase
 
         $this->expectException(InvalidSignatureAlgorithmException::class);
         $this->expectExceptionMessage('无法解析算法: unknown-algorithm');
-        
+
         $parseMethod->invoke($this->verifier, 'unknown-algorithm');
     }
 
@@ -156,7 +160,7 @@ class SignatureVerifierTest extends TestCase
 
         foreach ($testCases as $case) {
             $result = $this->verifier->verify($case[0], $case[1], $case[2], $case[3]);
-            $this->assertFalse($result, "Verify should return false for invalid inputs");
+            $this->assertFalse($result, 'Verify should return false for invalid inputs');
         }
     }
-} 
+}

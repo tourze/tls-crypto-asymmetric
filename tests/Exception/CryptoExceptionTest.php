@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
+use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 use Tourze\TLSCryptoAsymmetric\Exception\CryptoException;
 
 /**
  * CryptoException测试
+ *
+ * @internal
  */
-class CryptoExceptionTest extends TestCase
+#[CoversClass(CryptoException::class)]
+final class CryptoExceptionTest extends AbstractExceptionTestCase
 {
     /**
      * 测试异常基本功能
@@ -21,7 +26,7 @@ class CryptoExceptionTest extends TestCase
         $code = 2001;
         $previous = new \Exception('Previous exception');
 
-        $exception = new CryptoException($message, $code, $previous);
+        $exception = new AsymmetricCipherException($message, $code, $previous);
 
         $this->assertEquals($message, $exception->getMessage());
         $this->assertEquals($code, $exception->getCode());
@@ -33,7 +38,7 @@ class CryptoExceptionTest extends TestCase
      */
     public function testInheritance(): void
     {
-        $exception = new CryptoException('Test message');
+        $exception = new AsymmetricCipherException('Test message');
 
         $this->assertInstanceOf(\Exception::class, $exception);
     }
@@ -43,7 +48,7 @@ class CryptoExceptionTest extends TestCase
      */
     public function testNoArgumentsConstructor(): void
     {
-        $exception = new CryptoException();
+        $exception = new AsymmetricCipherException();
 
         $this->assertEquals('', $exception->getMessage());
         $this->assertEquals(0, $exception->getCode());
@@ -56,7 +61,7 @@ class CryptoExceptionTest extends TestCase
     public function testMessageOnlyConstructor(): void
     {
         $message = 'Crypto error occurred';
-        $exception = new CryptoException($message);
+        $exception = new AsymmetricCipherException($message);
 
         $this->assertEquals($message, $exception->getMessage());
         $this->assertEquals(0, $exception->getCode());
@@ -69,16 +74,11 @@ class CryptoExceptionTest extends TestCase
     public function testExceptionCanBeCaught(): void
     {
         $message = 'Test exception catching';
-        $caught = false;
 
-        try {
-            throw new CryptoException($message);
-        } catch (CryptoException $e) {
-            $caught = true;
-            $this->assertEquals($message, $e->getMessage());
-        }
+        $this->expectException(CryptoException::class);
+        $this->expectExceptionMessage($message);
 
-        $this->assertTrue($caught, 'CryptoException should be caught');
+        throw new AsymmetricCipherException($message);
     }
 
     /**
@@ -87,16 +87,11 @@ class CryptoExceptionTest extends TestCase
     public function testExceptionCanBeCaughtByException(): void
     {
         $message = 'Test exception catching by Exception';
-        $caught = false;
 
-        try {
-            throw new CryptoException($message);
-        } catch (\Throwable $e) {
-            $caught = true;
-            $this->assertEquals($message, $e->getMessage());
-        }
+        $this->expectException(\Throwable::class);
+        $this->expectExceptionMessage($message);
 
-        $this->assertTrue($caught, 'CryptoException should be caught by Exception');
+        throw new AsymmetricCipherException($message);
     }
 
     /**
@@ -104,14 +99,14 @@ class CryptoExceptionTest extends TestCase
      */
     public function testExceptionStackTrace(): void
     {
-        $exception = new CryptoException('Stack trace test');
+        $exception = new AsymmetricCipherException('Stack trace test');
 
         $trace = $exception->getTrace();
         $this->assertNotEmpty($trace);
 
         // 验证栈顶是当前方法
         $this->assertEquals(__FUNCTION__, $trace[0]['function']);
-        $this->assertEquals(__CLASS__, $trace[0]['class']);
+        $this->assertEquals(__CLASS__, $trace[0]['class'] ?? '');
     }
 
     /**
@@ -120,7 +115,7 @@ class CryptoExceptionTest extends TestCase
     public function testExceptionStringRepresentation(): void
     {
         $message = 'String representation test';
-        $exception = new CryptoException($message);
+        $exception = new AsymmetricCipherException($message);
 
         $stringRepresentation = (string) $exception;
         $this->assertStringContainsString($message, $stringRepresentation);
@@ -132,7 +127,7 @@ class CryptoExceptionTest extends TestCase
      */
     public function testExceptionFileAndLine(): void
     {
-        $exception = new CryptoException('File and line test');
+        $exception = new AsymmetricCipherException('File and line test');
 
         $this->assertEquals(__FILE__, $exception->getFile());
         $this->assertGreaterThan(0, $exception->getLine());
@@ -144,18 +139,18 @@ class CryptoExceptionTest extends TestCase
     public function testExceptionChain(): void
     {
         $rootException = new \RuntimeException('Root cause');
-        $cryptoException = new CryptoException('Crypto error', 0, $rootException);
+        $cryptoException = new AsymmetricCipherException('Crypto error', 0, $rootException);
 
         $this->assertSame($rootException, $cryptoException->getPrevious());
 
         // 测试异常链遍历
         $current = $cryptoException;
         $chainLength = 0;
-        while ($current !== null) {
-            $chainLength++;
+        while (null !== $current) {
+            ++$chainLength;
             $current = $current->getPrevious();
         }
 
         $this->assertEquals(2, $chainLength);
     }
-} 
+}

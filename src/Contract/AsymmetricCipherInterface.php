@@ -11,16 +11,15 @@ interface AsymmetricCipherInterface
 {
     /**
      * 获取算法名称
-     *
-     * @return string
      */
     public function getName(): string;
 
     /**
      * 生成密钥对
      *
-     * @param array $options 生成密钥对时的选项（如密钥大小、曲线类型等）
-     * @return array 包含私钥和公钥的数组
+     * @param array<string, mixed> $options 生成密钥对时的选项（如密钥大小、曲线类型等）
+     *
+     * @return array<string, string> 包含私钥和公钥的数组
      */
     public function generateKeyPair(array $options = []): array;
 
@@ -29,7 +28,8 @@ interface AsymmetricCipherInterface
      *
      * @param string $plaintext 明文数据
      * @param string $publicKey 公钥
-     * @param array $options 加密选项
+     * @param array<string, mixed>  $options   加密选项
+     *
      * @return string 加密后的数据
      */
     public function encrypt(string $plaintext, string $publicKey, array $options = []): string;
@@ -39,7 +39,8 @@ interface AsymmetricCipherInterface
      *
      * @param string $ciphertext 密文数据
      * @param string $privateKey 私钥
-     * @param array $options 解密选项
+     * @param array<string, mixed>  $options    解密选项
+     *
      * @return string 解密后的数据
      */
     public function decrypt(string $ciphertext, string $privateKey, array $options = []): string;
@@ -47,9 +48,10 @@ interface AsymmetricCipherInterface
     /**
      * 使用私钥签名数据
      *
-     * @param string $data 要签名的数据
+     * @param string $data       要签名的数据
      * @param string $privateKey 私钥
-     * @param array $options 签名选项
+     * @param array<string, mixed>  $options    签名选项
+     *
      * @return string 签名
      */
     public function sign(string $data, string $privateKey, array $options = []): string;
@@ -57,10 +59,11 @@ interface AsymmetricCipherInterface
     /**
      * 使用公钥验证签名
      *
-     * @param string $data 原始数据
+     * @param string $data      原始数据
      * @param string $signature 签名
      * @param string $publicKey 公钥
-     * @param array $options 验证选项
+     * @param array<string, mixed>  $options   验证选项
+     *
      * @return bool 签名是否有效
      */
     public function verify(string $data, string $signature, string $publicKey, array $options = []): bool;

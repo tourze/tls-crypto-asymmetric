@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace Tourze\TLSCryptoAsymmetric\Tests\Cipher;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tourze\TLSCryptoAsymmetric\Cipher\Ed448;
 use Tourze\TLSCryptoAsymmetric\Exception\AsymmetricCipherException;
 
 /**
  * Ed448签名算法测试
+ *
+ * @internal
  */
-class Ed448Test extends TestCase
+#[CoversClass(Ed448::class)]
+final class Ed448Test extends TestCase
 {
     private Ed448 $ed448;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->ed448 = new Ed448();
     }
 
@@ -45,15 +50,17 @@ class Ed448Test extends TestCase
         $this->assertStringContainsString('-----END PUBLIC KEY-----', $keyPair['publicKey']);
 
         // 如果是模拟实现，跳过OpenSSL检查
-        if (isset($keyPair['mock']) && $keyPair['mock']) {
+        if (isset($keyPair['mock']) && is_bool($keyPair['mock']) && $keyPair['mock']) {
             return;
         }
 
         // 只有在真实环境中才验证密钥类型
         if (extension_loaded('openssl')) {
             $privateKey = @openssl_pkey_get_private($keyPair['privateKey']);
-            if ($privateKey !== false) {
+            if (false !== $privateKey) {
                 $keyDetails = openssl_pkey_get_details($privateKey);
+                $this->assertIsArray($keyDetails);
+                $this->assertArrayHasKey('type', $keyDetails);
                 $this->assertEquals(OPENSSL_KEYTYPE_EC, $keyDetails['type']);
             }
         }
@@ -131,7 +138,7 @@ class Ed448Test extends TestCase
     {
         // 用一个不是正确格式的密钥来测试
         $invalidKey = "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----";
-        
+
         $this->expectException(AsymmetricCipherException::class);
         $this->ed448->sign('test message', $invalidKey);
     }
@@ -146,13 +153,14 @@ class Ed448Test extends TestCase
         $property = $reflection->getProperty('useMockImplementation');
         $property->setAccessible(true);
         $property->setValue($this->ed448, false);
-        
+
         // 模拟临时禁用OpenSSL扩展（通过修改内部状态）
         // 这里我们只能测试当前代码路径下的行为
         // 在真实环境中，Ed448会使用模拟实现，这样可以确保测试不会失败
-        
+
         // 如果当前环境不支持Ed448，则我们可以模拟这个测试
-        if (!extension_loaded('openssl') || !in_array('ED448', openssl_get_curve_names())) {
+        $curves = openssl_get_curve_names();
+        if (!extension_loaded('openssl') || (false !== $curves && !in_array('ED448', $curves, true))) {
             $this->expectException(AsymmetricCipherException::class);
             $this->ed448->generateKeyPair();
         } else {
@@ -170,15 +178,15 @@ class Ed448Test extends TestCase
     {
         // 由于我们现在有模拟实现，在不支持Ed448的环境中会自动使用模拟实现
         // 所以这个测试现在验证模拟实现是否正常工作
-        
+
         $keyPair = $this->ed448->generateKeyPair();
-        
+
         // 验证返回的密钥对是有效的
         $this->assertArrayHasKey('privateKey', $keyPair);
         $this->assertArrayHasKey('publicKey', $keyPair);
         $this->assertStringContainsString('-----BEGIN PRIVATE KEY-----', $keyPair['privateKey']);
         $this->assertStringContainsString('-----BEGIN PUBLIC KEY-----', $keyPair['publicKey']);
-        
+
         // 验证签名和验证功能是否正常
         $message = 'Test message for unsupported environment';
         $signature = $this->ed448->sign($message, $keyPair['privateKey']);

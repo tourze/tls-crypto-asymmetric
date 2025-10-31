@@ -12,32 +12,21 @@ use Tourze\TLSCryptoAsymmetric\Exception\InvalidKeyPairException;
 class KeyPair
 {
     /**
-     * @var string 私钥
-     */
-    private string $privateKey;
-    
-    /**
-     * @var string 公钥
-     */
-    private string $publicKey;
-    
-    /**
      * 构造函数
      *
      * @param string $privateKey 私钥
-     * @param string $publicKey 公钥
+     * @param string $publicKey  公钥
      */
-    public function __construct(string $privateKey, string $publicKey)
-    {
-        $this->privateKey = $privateKey;
-        $this->publicKey = $publicKey;
+    public function __construct(
+        private readonly string $privateKey,
+        private readonly string $publicKey,
+    ) {
     }
-    
+
     /**
      * 从数组创建密钥对
      *
-     * @param array $keyPair 包含 'privateKey' 和 'publicKey' 的数组
-     * @return self
+     * @param array<string, string> $keyPair 包含 'privateKey' 和 'publicKey' 的数组
      */
     public static function fromArray(array $keyPair): self
     {
@@ -47,31 +36,27 @@ class KeyPair
 
         return new self($keyPair['privateKey'], $keyPair['publicKey']);
     }
-    
+
     /**
      * 获取私钥
-     *
-     * @return string
      */
     public function getPrivateKey(): string
     {
         return $this->privateKey;
     }
-    
+
     /**
      * 获取公钥
-     *
-     * @return string
      */
     public function getPublicKey(): string
     {
         return $this->publicKey;
     }
-    
+
     /**
      * 转换为数组
      *
-     * @return array
+     * @return array<string, string>
      */
     public function toArray(): array
     {

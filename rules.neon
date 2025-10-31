@@ -1,0 +1,9 @@
+parameters:
+    ignoreErrors:
+        # 忽略 TLS 非对称加密包中的密码学算法类名 - 这些是标准的密码学术语命名
+        -
+            message: '#类名 "(ECDSA|Ed25519|Ed448)" 不符合帕斯卡命名法.*#'
+            paths:
+                - src/Cipher/ECDSA.php
+                - src/Cipher/Ed25519.php
+                - src/Cipher/Ed448.php

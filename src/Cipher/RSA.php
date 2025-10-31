@@ -31,9 +31,11 @@ class RSA implements AsymmetricCipherInterface
     /**
      * 生成密钥对
      *
-     * @param array $options 生成密钥对时的选项
-     *                      - keySize: 密钥大小（位，默认2048）
-     * @return array 包含'privateKey'和'publicKey'的数组
+     * @param array<string, mixed> $options 生成密钥对时的选项
+     *                       - keySize: 密钥大小（位，默认2048）
+     *
+     * @return array<string, string> 包含'privateKey'和'publicKey'的数组
+     *
      * @throws AsymmetricCipherException 如果生成密钥对失败
      */
     public function generateKeyPair(array $options = []): array
@@ -43,7 +45,7 @@ class RSA implements AsymmetricCipherInterface
         // 验证密钥大小
         $validKeySizes = [512, 1024, 2048, 3072, 4096]; // 添加512位用于测试
 
-        if (!in_array($keySize, $validKeySizes)) {
+        if (!in_array($keySize, $validKeySizes, true)) {
             throw new AsymmetricCipherException('无效的RSA密钥大小，支持的值为：512(仅测试用), 1024, 2048, 3072, 4096');
         }
 
@@ -59,19 +61,19 @@ class RSA implements AsymmetricCipherInterface
 
         // 生成密钥对
         $res = openssl_pkey_new($config);
-        if ($res === false) {
+        if (false === $res) {
             throw new AsymmetricCipherException('RSA密钥对生成失败: ' . openssl_error_string());
         }
 
         // 导出私钥
         openssl_pkey_export($res, $privateKey);
-        if (empty($privateKey)) {
+        if ('' === $privateKey || null === $privateKey) {
             throw new AsymmetricCipherException('RSA私钥导出失败: ' . openssl_error_string());
         }
 
         // 导出公钥
         $keyDetails = openssl_pkey_get_details($res);
-        if ($keyDetails === false) {
+        if (false === $keyDetails) {
             throw new AsymmetricCipherException('RSA密钥详情获取失败: ' . openssl_error_string());
         }
 
@@ -80,7 +82,7 @@ class RSA implements AsymmetricCipherInterface
         return [
             'privateKey' => $privateKey,
             'publicKey' => $publicKey,
-            'keySize' => $keySize,
+            'keySize' => (string) $keySize,
         ];
     }
 
@@ -89,9 +91,11 @@ class RSA implements AsymmetricCipherInterface
      *
      * @param string $plaintext 明文数据
      * @param string $publicKey 公钥（PEM格式）
-     * @param array $options 加密选项
-     *                      - padding: 填充方式（默认PADDING_OAEP）
+     * @param array<string, mixed>  $options   加密选项
+     *                          - padding: 填充方式（默认PADDING_OAEP）
+     *
      * @return string 加密后的数据
+     *
      * @throws AsymmetricCipherException 如果加密失败
      */
     public function encrypt(string $plaintext, string $publicKey, array $options = []): string
@@ -100,13 +104,13 @@ class RSA implements AsymmetricCipherInterface
 
         // 加载公钥
         $pubKeyRes = openssl_pkey_get_public($publicKey);
-        if ($pubKeyRes === false) {
+        if (false === $pubKeyRes) {
             throw new AsymmetricCipherException('RSA公钥加载失败: ' . openssl_error_string());
         }
 
         // 获取密钥详情以确定最大明文长度
         $keyDetails = openssl_pkey_get_details($pubKeyRes);
-        if ($keyDetails === false) {
+        if (false === $keyDetails) {
             throw new AsymmetricCipherException('RSA密钥详情获取失败: ' . openssl_error_string());
         }
 
@@ -128,7 +132,7 @@ class RSA implements AsymmetricCipherInterface
         $result = '';
         $success = openssl_public_encrypt($plaintext, $result, $pubKeyRes, $padding);
 
-        if ($success === false) {
+        if (false === $success) {
             throw new AsymmetricCipherException('RSA加密失败: ' . openssl_error_string());
         }
 
@@ -140,9 +144,11 @@ class RSA implements AsymmetricCipherInterface
      *
      * @param string $ciphertext 密文数据
      * @param string $privateKey 私钥（PEM格式）
-     * @param array $options 解密选项
-     *                      - padding: 填充方式（默认PADDING_OAEP）
+     * @param array<string, mixed>  $options    解密选项
+     *                           - padding: 填充方式（默认PADDING_OAEP）
+     *
      * @return string 解密后的数据
+     *
      * @throws AsymmetricCipherException 如果解密失败
      */
     public function decrypt(string $ciphertext, string $privateKey, array $options = []): string
@@ -151,7 +157,7 @@ class RSA implements AsymmetricCipherInterface
 
         // 加载私钥
         $privKeyRes = openssl_pkey_get_private($privateKey);
-        if ($privKeyRes === false) {
+        if (false === $privKeyRes) {
             throw new AsymmetricCipherException('RSA私钥加载失败: ' . openssl_error_string());
         }
 
@@ -159,7 +165,7 @@ class RSA implements AsymmetricCipherInterface
         $result = '';
         $success = openssl_private_decrypt($ciphertext, $result, $privKeyRes, $padding);
 
-        if ($success === false) {
+        if (false === $success) {
             throw new AsymmetricCipherException('RSA解密失败: ' . openssl_error_string());
         }
 
@@ -169,11 +175,13 @@ class RSA implements AsymmetricCipherInterface
     /**
      * 使用私钥签名数据
      *
-     * @param string $data 要签名的数据
+     * @param string $data       要签名的数据
      * @param string $privateKey 私钥（PEM格式）
-     * @param array $options 签名选项
-     *                      - algorithm: 签名算法（默认'sha256'）
+     * @param array<string, mixed>  $options    签名选项
+     *                           - algorithm: 签名算法（默认'sha256'）
+     *
      * @return string 签名
+     *
      * @throws AsymmetricCipherException 如果签名失败
      */
     public function sign(string $data, string $privateKey, array $options = []): string
@@ -182,7 +190,7 @@ class RSA implements AsymmetricCipherInterface
 
         // 加载私钥
         $privKeyRes = openssl_pkey_get_private($privateKey);
-        if ($privKeyRes === false) {
+        if (false === $privKeyRes) {
             throw new AsymmetricCipherException('RSA私钥加载失败: ' . openssl_error_string());
         }
 
@@ -190,7 +198,7 @@ class RSA implements AsymmetricCipherInterface
         $signature = '';
         $success = openssl_sign($data, $signature, $privKeyRes, $algorithm);
 
-        if ($success === false) {
+        if (false === $success) {
             throw new AsymmetricCipherException('RSA签名生成失败: ' . openssl_error_string());
         }
 
@@ -200,12 +208,14 @@ class RSA implements AsymmetricCipherInterface
     /**
      * 使用公钥验证签名
      *
-     * @param string $data 原始数据
+     * @param string $data      原始数据
      * @param string $signature 签名
      * @param string $publicKey 公钥（PEM格式）
-     * @param array $options 验证选项
-     *                      - algorithm: 签名算法（默认'sha256'）
+     * @param array<string, mixed>  $options   验证选项
+     *                          - algorithm: 签名算法（默认'sha256'）
+     *
      * @return bool 签名是否有效
+     *
      * @throws AsymmetricCipherException 如果验证过程出错
      */
     public function verify(string $data, string $signature, string $publicKey, array $options = []): bool
@@ -214,17 +224,17 @@ class RSA implements AsymmetricCipherInterface
 
         // 加载公钥
         $pubKeyRes = openssl_pkey_get_public($publicKey);
-        if ($pubKeyRes === false) {
+        if (false === $pubKeyRes) {
             throw new AsymmetricCipherException('RSA公钥加载失败: ' . openssl_error_string());
         }
 
         // 验证签名
         $result = openssl_verify($data, $signature, $pubKeyRes, $algorithm);
 
-        if ($result === -1) {
+        if (-1 === $result) {
             throw new AsymmetricCipherException('RSA签名验证过程出错: ' . openssl_error_string());
         }
 
-        return $result === 1;
+        return 1 === $result;
     }
 }

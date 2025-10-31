@@ -27,8 +27,6 @@ class DSA implements AsymmetricCipherInterface
 
     /**
      * 获取算法名称
-     *
-     * @return string
      */
     public function getName(): string
     {
@@ -38,8 +36,10 @@ class DSA implements AsymmetricCipherInterface
     /**
      * 生成DSA密钥对
      *
-     * @param array $options 生成密钥对时的选项
-     * @return array 包含私钥和公钥的数组
+     * @param array<string, mixed> $options 生成密钥对时的选项
+     *
+     * @return array<string, string> 包含私钥和公钥的数组
+     *
      * @throws AsymmetricCipherException 如果生成密钥对失败
      */
     public function generateKeyPair(array $options = []): array
@@ -65,7 +65,7 @@ class DSA implements AsymmetricCipherInterface
             ];
 
             $res = openssl_pkey_new($config);
-            if ($res === false) {
+            if (false === $res) {
                 throw new AsymmetricCipherException('DSA密钥对生成失败: ' . openssl_error_string());
             }
 
@@ -76,7 +76,7 @@ class DSA implements AsymmetricCipherInterface
 
             // 导出公钥（PEM格式）
             $details = openssl_pkey_get_details($res);
-            if ($details === false) {
+            if (false === $details) {
                 throw new AsymmetricCipherException('获取DSA密钥详情失败: ' . openssl_error_string());
             }
 
@@ -85,7 +85,6 @@ class DSA implements AsymmetricCipherInterface
             return [
                 'privateKey' => $privateKeyPem,
                 'publicKey' => $publicKeyPem,
-                'bits' => $keyBits,
             ];
         } catch (\Throwable $e) {
             throw new AsymmetricCipherException('DSA密钥对生成失败: ' . $e->getMessage());
@@ -99,8 +98,10 @@ class DSA implements AsymmetricCipherInterface
      *
      * @param string $plaintext 明文数据
      * @param string $publicKey 公钥
-     * @param array $options 加密选项
+     * @param array<string, mixed>  $options   加密选项
+     *
      * @return string 加密后的数据
+     *
      * @throws AsymmetricCipherException 始终抛出异常，因为DSA不支持加密
      */
     public function encrypt(string $plaintext, string $publicKey, array $options = []): string
@@ -115,8 +116,10 @@ class DSA implements AsymmetricCipherInterface
      *
      * @param string $ciphertext 密文数据
      * @param string $privateKey 私钥
-     * @param array $options 解密选项
+     * @param array<string, mixed>  $options    解密选项
+     *
      * @return string 解密后的数据
+     *
      * @throws AsymmetricCipherException 始终抛出异常，因为DSA不支持解密
      */
     public function decrypt(string $ciphertext, string $privateKey, array $options = []): string
@@ -127,10 +130,12 @@ class DSA implements AsymmetricCipherInterface
     /**
      * 使用私钥签名数据
      *
-     * @param string $data 要签名的数据
+     * @param string $data       要签名的数据
      * @param string $privateKey 私钥
-     * @param array $options 签名选项
+     * @param array<string, mixed>  $options    签名选项
+     *
      * @return string 签名
+     *
      * @throws AsymmetricCipherException 如果签名失败
      */
     public function sign(string $data, string $privateKey, array $options = []): string
@@ -146,13 +151,13 @@ class DSA implements AsymmetricCipherInterface
 
             // 加载私钥
             $privKey = openssl_pkey_get_private($privateKey);
-            if ($privKey === false) {
+            if (false === $privKey) {
                 throw new AsymmetricCipherException('加载DSA私钥失败: ' . openssl_error_string());
             }
 
             // 验证私钥类型
             $details = openssl_pkey_get_details($privKey);
-            if ($details === false || $details['type'] !== OPENSSL_KEYTYPE_DSA) {
+            if (false === $details || OPENSSL_KEYTYPE_DSA !== $details['type']) {
                 throw new AsymmetricCipherException('提供的密钥不是DSA密钥');
             }
 
@@ -175,56 +180,91 @@ class DSA implements AsymmetricCipherInterface
     /**
      * 使用公钥验证签名
      *
-     * @param string $data 原始数据
+     * @param string $data      原始数据
      * @param string $signature 签名
      * @param string $publicKey 公钥
-     * @param array $options 验证选项
+     * @param array<string, mixed>  $options   验证选项
+     *
      * @return bool 签名是否有效
+     *
      * @throws AsymmetricCipherException 如果验证签名失败
      */
     public function verify(string $data, string $signature, string $publicKey, array $options = []): bool
     {
-        // 检查OpenSSL扩展是否加载
+        $this->checkOpenSSLExtension();
+
+        try {
+            $digestAlg = $options['digest_alg'] ?? self::DEFAULT_DIGEST_ALG;
+            $pubKey = $this->loadAndValidatePublicKey($publicKey);
+            $result = openssl_verify($data, $signature, $pubKey, $digestAlg);
+
+            return $this->handleVerificationResult($result);
+        } catch (AsymmetricCipherException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            throw new AsymmetricCipherException('DSA签名验证失败: ' . $e->getMessage());
+        }
+    }
+
+    private function checkOpenSSLExtension(): void
+    {
         if (!extension_loaded('openssl')) {
             throw new AsymmetricCipherException('OpenSSL扩展未加载，无法使用DSA');
         }
+    }
 
-        try {
-            // 获取摘要算法
-            $digestAlg = $options['digest_alg'] ?? self::DEFAULT_DIGEST_ALG;
-
-            // 加载公钥
-            $pubKey = openssl_pkey_get_public($publicKey);
-            if ($pubKey === false) {
-                throw new AsymmetricCipherException('加载DSA公钥失败: ' . openssl_error_string());
-            }
-
-            // 验证公钥类型
-            $details = openssl_pkey_get_details($pubKey);
-            if ($details === false || $details['type'] !== OPENSSL_KEYTYPE_DSA) {
-                throw new AsymmetricCipherException('提供的密钥不是DSA密钥');
-            }
-
-            // 使用OpenSSL验证签名
-            $result = openssl_verify($data, $signature, $pubKey, $digestAlg);
-            
-            // 只有当result为-1且有错误信息时才抛出异常
-            if ($result === -1) {
-                $error = openssl_error_string();
-                if ($error) {
-                    throw new AsymmetricCipherException('DSA签名验证失败: ' . $error);
-                }
-                // 如果没有错误信息，可能是签名格式问题，返回false
-                return false;
-            }
-
-            return $result === 1;
-        } catch (AsymmetricCipherException $e) {
-            // 如果是AsymmetricCipherException，则重新抛出
-            throw $e;
-        } catch (\Throwable $e) {
-            // 其他异常也抛出
-            throw new AsymmetricCipherException('DSA签名验证失败: ' . $e->getMessage());
+    /**
+     * @return \OpenSSLAsymmetricKey
+     */
+    private function loadAndValidatePublicKey(string $publicKey)
+    {
+        $pubKey = openssl_pkey_get_public($publicKey);
+        if (false === $pubKey) {
+            throw new AsymmetricCipherException('加载DSA公钥失败: ' . openssl_error_string());
         }
+
+        $details = openssl_pkey_get_details($pubKey);
+        if (false === $details || OPENSSL_KEYTYPE_DSA !== $details['type']) {
+            throw new AsymmetricCipherException('提供的密钥不是DSA密钥');
+        }
+
+        return $pubKey;
+    }
+
+    private function handleVerificationResult(int|false $result): bool
+    {
+        if (-1 === $result) {
+            // 系统错误，需要抛出异常
+            $this->handleVerificationError();
+
+            return false;
+        }
+
+        if (false === $result) {
+            // openssl_verify 返回 false 表示签名验证失败，这是正常情况，不应抛出异常
+            // 但需要清理错误队列以防止错误累积
+            while (openssl_error_string()) {
+                // 清除所有错误
+            }
+
+            return false;
+        }
+
+        return 1 === $result;
+    }
+
+    private function handleVerificationError(): void
+    {
+        $error = openssl_error_string();
+        // 清理错误队列
+        while (openssl_error_string()) {
+            // 清除所有错误
+        }
+
+        if (!is_string($error) || '' === $error) {
+            return;
+        }
+
+        throw new AsymmetricCipherException('DSA签名验证失败: ' . $error);
     }
 }

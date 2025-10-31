@@ -2,18 +2,25 @@
 
 declare(strict_types=1);
 
-namespace Tourze\TLSCryptoAsymmetric\Tests\Unit\Exception;
+namespace Tourze\TLSCryptoAsymmetric\Tests\Exception;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitBase\AbstractExceptionTestCase;
 use Tourze\TLSCryptoAsymmetric\Exception\CryptoException;
 use Tourze\TLSCryptoAsymmetric\Exception\InvalidKeyPairException;
 
-class InvalidKeyPairExceptionTest extends TestCase
+/**
+ * InvalidKeyPairException测试
+ *
+ * @internal
+ */
+#[CoversClass(InvalidKeyPairException::class)]
+final class InvalidKeyPairExceptionTest extends AbstractExceptionTestCase
 {
     public function testExceptionIsInstanceOfCryptoException(): void
     {
         $exception = new InvalidKeyPairException('Test message');
-        
+
         $this->assertInstanceOf(CryptoException::class, $exception);
     }
 
@@ -21,7 +28,7 @@ class InvalidKeyPairExceptionTest extends TestCase
     {
         $message = 'Invalid key pair provided';
         $exception = new InvalidKeyPairException($message);
-        
+
         $this->assertSame($message, $exception->getMessage());
     }
 
@@ -30,7 +37,7 @@ class InvalidKeyPairExceptionTest extends TestCase
         $message = 'Invalid key pair';
         $code = 500;
         $exception = new InvalidKeyPairException($message, $code);
-        
+
         $this->assertSame($message, $exception->getMessage());
         $this->assertSame($code, $exception->getCode());
     }
@@ -39,7 +46,7 @@ class InvalidKeyPairExceptionTest extends TestCase
     {
         $previous = new \Exception('Previous exception');
         $exception = new InvalidKeyPairException('Current exception', 0, $previous);
-        
+
         $this->assertSame($previous, $exception->getPrevious());
     }
 }
